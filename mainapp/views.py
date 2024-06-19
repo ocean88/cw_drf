@@ -21,42 +21,19 @@ class HabitViewSet(viewsets.ModelViewSet):
         """
         Получение списка привычек для аутентифицированных пользователей.
         """
-        if self.request.user.is_authenticated:
-            return Habit.objects.filter(user=self.request.user)
-        else:
-            return Habit.objects.none()
+        return Habit.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-    @swagger_auto_schema(
-        operation_description="Создание привычки",
-        request_body=HabitSerializer,
-        responses={201: HabitSerializer()},
-    )
-    def perform_update(self, serializer):
-        instance = self.get_object()
-        if instance.user != self.request.user:
-            raise ValidationError("У вас нет прав.")
-        serializer.save()
 
-    @swagger_auto_schema(
-        operation_description="Удаление привычки",
-        responses={204: "No Content"},
-    )
-    def perform_destroy(self, instance):
-        if instance.user != self.request.user:
-            raise ValidationError("У вас нет прав.")
-        instance.delete()
-
-
-class PublicHabitViewSet(viewsets.ModelViewSet):
+class PublicHabitViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet для работы с публичными привычками.
     """
     queryset = Habit.objects.filter(is_public=True)
     serializer_class = HabitSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticated]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["action", "place"]
     ordering_fields = ["id"]
@@ -66,29 +43,16 @@ class PublicHabitViewSet(viewsets.ModelViewSet):
         operation_description="Получение списка публичных привычек",
         responses={200: HabitSerializer(many=True)},
     )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Получение публичной привычки",
+        responses={200: HabitSerializer()},
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
     def get_queryset(self):
-        user = self.request.user
-        if user.is_authenticated:
-            if Habit.objects.filter(is_public=True).exists():
-                return Habit.objects.filter(is_public=True)
-            else:
-                return Habit.objects.filter(user=user)
-        else:
-            return Habit.objects.none()
+        return Habit.objects.filter(is_public=True)
 
-    @swagger_auto_schema(
-        operation_description="Получение списка публичных привычек или привычек пользователя",
-        responses={200: HabitSerializer(many=True)},
-    )
-    def get_permissions(self):
-        if self.action in ["create", "update", "partial_update", "destroy"]:
-            return [IsAuthenticated(), IsOwnerOrReadOnly()]
-        return [IsAuthenticated(), IsOwnerOrReadOnly()]
-
-    @swagger_auto_schema(
-        operation_description="Создание публичной привычки",
-        request_body=HabitSerializer,
-        responses={201: HabitSerializer()},
-    )
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)

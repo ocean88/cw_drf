@@ -21,11 +21,10 @@ def validate_related_habit(habit):
 
 
 def validate_pleasant_habit(habit):
-    if habit.is_pleasant:
-        if habit.reward or habit.related_habit:
-            raise ValidationError(
-                "У приятной привычки не может быть вознаграждения или связанной привычки."
-            )
+    if habit.is_pleasant and (habit.reward or habit.related_habit):
+        raise ValidationError(
+            "У приятной привычки не может быть вознаграждения или связанной привычки."
+        )
 
 
 def validate_periodicity(habit):

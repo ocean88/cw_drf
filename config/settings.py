@@ -151,9 +151,7 @@ SIMPLE_JWT = {
 }
 
 
-LOCATION = os.getenv("STRIPE_SECRET_KEY")
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
-STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
+LOCATION = os.getenv("LOCATION")
 
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL") # Например, Redis, который по умолчанию работает на порту 6379
 
@@ -168,7 +166,6 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_TIMEZONE = "Asia/Yakutsk"
 
-TELEGRAM_URL = os.getenv("TELEGRAM_URL")
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 CELERY_BEAT_SCHEDULE = {

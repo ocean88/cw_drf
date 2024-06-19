@@ -22,19 +22,6 @@ class HabitSerializer(serializers.ModelSerializer):
             "related_habit": {"allow_null": True},
         }
 
-    def create(self, validated_data):
-        if self.context["request"].user.is_authenticated:
-            validated_data["user"] = self.context["request"].user
-            return super().create(validated_data)
-        else:
-            raise serializers.ValidationError("Пользователь не авторизован")
-
-    def update(self, instance, validated_data):
-        if self.context["request"].user.is_authenticated:
-            return super().update(instance, validated_data)
-        else:
-            raise serializers.ValidationError("Пользователь не авторизован")
-
     def validate(self, data):
         # Получаем экземпляр Habit из входных данных
         habit_instance = Habit(**data)
