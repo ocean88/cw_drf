@@ -11,14 +11,10 @@ def send_telegram_message(tg_chat_id, message):
         "text": message,
         "chat_id": tg_chat_id,
     }
-    response = requests.get(
-        f"https://api.telegram.org/bot{settings.TELEGRAM_TOKEN}/sendMessage",
-        params=params,
-    )
-    if response.status_code == 200:
-        return True
-    else:
-        return False
+    url = f"https://api.telegram.org/bot{settings.TELEGRAM_TOKEN}/sendMessage"
+
+    response = requests.get(url, params=params)
+    return response.ok
 
 
 @shared_task
@@ -26,7 +22,7 @@ def check_habits_and_send_messages():
     """Периодическое напоминанение привычек"""
     current_datetime = datetime.now()
     current_date = current_datetime.date()
-    habits = Habit.objects.all()
+    habits = Habit.objects.select_related("user").exclude(user__tg_chat_id__isnull=True)
 
     for habit in habits:
         habit_datetime = datetime.combine(current_date, habit.time)
