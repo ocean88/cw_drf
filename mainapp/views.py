@@ -18,10 +18,13 @@ class HabitViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
 
     def get_queryset(self):
-        """
-        Получение списка привычек для аутентифицированных пользователей.
-        """
-        return Habit.objects.filter(user=self.request.user)
+        user = self.request.user
+        if user.is_authenticated:
+            return Habit.objects.filter(user=user)
+        else:
+            # Для анонимных пользователей показываем только публичные привычки или логику,
+            # которая подходит для вашего приложения
+            return Habit.objects.none() # Пример фильтрации по атрибуту public
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
